@@ -143,7 +143,7 @@
                 $this->sortOrder = $_GET['order'];
         }
 
-        //Obtiene valores GET de offset y limit 
+        //Obtiene valores GET de offset y limit ARREGLAR ESTO
         private function getOffsetLimit(){
             if($this->checkOffset()&&$this->checkLimit()){
                 $this->from = $_GET['offset'];
