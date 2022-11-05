@@ -20,7 +20,6 @@
 
         function __construct(){
             $this->jobsModel = new JobsModel();
-            $this->sectorsModel = new SectorsModel();
             $this->apiView = new ApiView();
             $this->data = file_get_contents("php://input");
             $this->fields = ['id', 'work_name', 'work_description', 'client_name', 'work_id', 'work_status', 'area', 'manager'];
