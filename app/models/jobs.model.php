@@ -14,9 +14,9 @@
             return $query->fetchAll(PDO::FETCH_OBJ);
         }
 
-        function getSectorJobs($fk_id, $sortField, $sortOrder){
-            $query = $this->db->prepare('SELECT works.id, works.work_name, works.work_description, works.client_name, works.work_id, works.work_status, garage.area, garage.manager FROM works JOIN garage ON works.fk_id = garage.id WHERE fk_id = ? ORDER BY works.'.$sortField.' '.$sortOrder);
-            $query->execute([$fk_id]);
+        function getSectorJobs($sortField, $sortOrder, $field, $fieldValue){
+            $query = $this->db->prepare('SELECT works.id, works.work_name, works.work_description, works.client_name, works.work_id, works.work_status, garage.area, garage.manager FROM works JOIN garage ON works.fk_id = garage.id WHERE '.$field.' = ? ORDER BY works.'.$sortField.' '.$sortOrder);
+            $query->execute([$fieldValue]);
             return $query->fetchAll(PDO::FETCH_OBJ);
         }
 

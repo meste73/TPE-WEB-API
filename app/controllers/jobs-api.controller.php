@@ -15,6 +15,8 @@
         private $sortOrder;
         private $from;
         private $quantity;
+        private $field;
+        private $fieldValue;
 
         function __construct(){
             $this->jobsModel = new JobsModel();
@@ -22,10 +24,6 @@
             $this->apiView = new ApiView();
             $this->data = file_get_contents("php://input");
             $this->fields = ['id', 'work_name', 'work_description', 'client_name', 'work_id', 'work_status', 'area', 'manager'];
-            $this->sortfield = 'id';
-            $this->sortOrder = "ASC";
-            $this->from = 0;
-            $this->quantity = $this->jobsModel->getCount()[0];
         }
 
         // API/JOBS GET
@@ -34,13 +32,23 @@
             $this->getSort();
             $this->getSortOrder();
             $this->getOffsetLimit();
+            $this->checkPaginationValues();
+            $this->checkSortValues();
+            $this->getFieldValues();
 
-            $jobs = $this->jobsModel->get($this->sortfield, $this->sortOrder);
-
-            if($jobs)
-                $this->apiView->response(array_slice($jobs, $this->from, $this->quantity));
-            else
-                $this->apiView->response("Objeto no encontrado.", 404);
+            if($this->field == null){
+                $jobs = $this->jobsModel->get($this->sortfield, $this->sortOrder);
+                if($jobs)
+                    $this->apiView->response(array_slice($jobs, $this->from, $this->quantity));
+                else
+                    $this->apiView->response("Objeto no encontrado.", 404);
+            } else{
+                $jobs = $this->jobsModel->getSectorJobs($this->sortfield, $this->sortOrder, $this->field, $this->fieldValue);
+                if($jobs)
+                    $this->apiView->response(array_slice($jobs, $this->from, $this->quantity));
+                else
+                    $this->apiView->response("Objeto no encontrado.", 404);
+            }
         }
 
         // API/JOBS/:ID GET
@@ -50,21 +58,6 @@
             
             if($job)
                 $this->apiView->response($job);
-            else
-                $this->apiView->response("Objeto no encontrado.", 404);
-        }
-
-        // API/JOBS/SECTORS/:ID GET
-        function getSectorJobs($params = null){
-
-            $this->getSort();
-            $this->getSortOrder();
-            $this->getOffsetLimit();
-
-            $id = $params[':ID'];
-            $jobs = $this->jobsModel->getSectorJobs($id, $this->sortfield, $this->sortOrder);
-            if($jobs)
-                $this->apiView->response(array_slice($jobs, $this->from, $this->quantity));
             else
                 $this->apiView->response("Objeto no encontrado.", 404);
         }
@@ -133,62 +126,86 @@
 
         //Obtiene valor GET de sort
         private function getSort(){
-            if(isset($_GET['sort']) && $this->checkField($_GET['sort']))
+            if(isset($_GET['sort']))
                 $this->sortfield = $_GET['sort'];
+            else
+                $this->sortfield = 'id';
         }
 
         //Obtiene valor GET de order
         private function getSortOrder(){
-            if(isset($_GET['order']) && $this->checkOrder($_GET['order']))
+            if(isset($_GET['order']))
                 $this->sortOrder = $_GET['order'];
+            else
+                $this->sortOrder = "ASC";
+            }
+
+        //Chequea que el valor GET 
+        private function checkSortValues(){
+            if(!($this->checkField()&&$this->checkOrder())){
+                $this->apiView->response("Los campos de busqueda no son validos.", 400);
+                die();
+            }
+        }
+
+        //Chequea que el valor GET sort sea valido, sino envia un mensaje con codigo 400 bad request.
+        private function checkField(){
+            foreach($this->fields as $field){
+                if($field == $this->sortfield){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //Chequea que el valor GET order sea valido, sino envia un mensaje con codigo 400 bad request.
+        private function checkOrder(){
+            if(($this->sortOrder == 'ASC')||($this->sortOrder == 'DESC'))
+                return true;
+            else
+                return false;
         }
 
         //Obtiene valores GET de offset y limit ARREGLAR ESTO
         private function getOffsetLimit(){
-            if($this->checkOffset()&&$this->checkLimit()){
+            if(isset($_GET['offset'])&&isset($_GET['limit'])){
                 $this->from = $_GET['offset'];
                 $this->quantity = $_GET['limit'];
             } else {
-                $this->apiView->response("Valores de paginados incorrectos", 400);
+                $this->from = 0;
+                $this->quantity = $this->jobsModel->getCount()[0];
+            }
+        }
+
+        private function checkPaginationValues(){
+            if(!($this->checkOffset($this->from)&&$this->checkLimit($this->quantity))){
+                $this->apiView->response("Los campos de paginacion no son validos.", 400);
                 die();
             }
         }
 
         //Chequea que el valor GET offset sea un numero.
-        private function checkOffset(){
-            if(isset($_GET['offset'])&&(is_numeric($_GET['offset'])))
+        private function checkOffset($offset){
+            if((is_numeric($offset)))
                 return true;
-            return false;
+            else
+                return false;
         }
 
         //Chequea que el valor GET limit sea un numero.
-        private function checkLimit(){
-            if(isset($_GET['limit'])&&(is_numeric($_GET['limit'])))
+        private function checkLimit($limit){
+            if((is_numeric($limit)))
                 return true;
-            return false;
+            else
+                return false;
         }
-        
-        //Chequea que el valor GET sort sea valido, sino envia un mensaje con codigo 400 bad request.
-        private function checkField($fieldToCheck){
-            $exists = false;
+
+        private function getFieldValues(){
             foreach($this->fields as $field){
-                if($field == $fieldToCheck){
-                    $exists = true;
+                if(isset($_GET[$field])){
+                    $this->field = $field;
+                    $this->fieldValue = $_GET[$field];
                 }
             }
-            if(!$exists){
-                $this->apiView->response("El campo ingresado no es valido", 400);
-                die();
-            }
-            return $exists;
         }
-
-        //Chequea que el valor GET order sea valido, sino envia un mensaje con codigo 400 bad request.
-        private function checkOrder($order){
-            if(($order == 'ASC')||($order == 'DESC'))
-                return true;
-            $this->apiView->response("El campo ingresado no es valido", 400);
-            die();
-        }
-
     }
