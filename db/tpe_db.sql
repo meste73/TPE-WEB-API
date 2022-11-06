@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-10-2022 a las 01:14:01
+-- Tiempo de generación: 06-11-2022 a las 05:16:07
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
 
@@ -60,8 +60,8 @@ CREATE TABLE `garage` (
 INSERT INTO `garage` (`id`, `area`, `manager`) VALUES
 (1, 'Torneria', 'Daniel Mestelan'),
 (2, 'Cajas de cambios', 'Ezequiel Mestelan'),
-(5, 'Trabado', 'Ezequiel Mestelan'),
-(12, 'Lavado', 'David Alberdi');
+(3, 'Trabado', 'Ezequiel Mestelan'),
+(4, 'Lavado', 'David Alberdi');
 
 -- --------------------------------------------------------
 
@@ -89,9 +89,14 @@ INSERT INTO `works` (`id`, `work_name`, `work_description`, `client_name`, `work
 (7, 'Caja de cambios Chevrolet Cruze', 'Service cambio de aceite', 'Alexa Knussel', 136580868, 'Recibido', 2),
 (10, 'Balanceo de cardan', 'Control cardan Chev Silverado 98, vibracion.', 'Claudio Guzman', 3253463, 'Recibido', 1),
 (14, 'Rectificar eje de pedalera', 'Desarmar eje de pedalera, rectificar eje y embujar cuerpo.', 'Miguel Arce', 112458, 'Recibido', 1),
-(15, 'Trabar 5ta Toyota Hilux', 'Realizar trabajo de engranaje y desplazable de 5ta marcha de caja de velocidades Toyota Hilux', 'Claudio Guzman', 365542, 'Recibido', 5),
-(16, 'Lavar block moto Rouser 200', 'Realizar lavado y descontaminado de carcaza block de moto Rouser NS 200.', 'Federico Acuña', 445784, 'Recibido', 12),
-(19, 'Lavar carcaza de caja ford falcon', 'Realizar limpieza de interior y exterior de caja de cambios ford falcon, eliminar pintura', 'Carlos Lopez', 987412, 'Recibido', 12);
+(32, 'Caja de cambios de Toyota Hilux', '5ta marcha no tracciona', 'La chicha', 242215, 'Finalizado', 2),
+(33, 'Reparacion de caja de velocidades G32', 'Zumbido, perdida de aceite, juego excesivo en directa', 'Franco De Paoli', 14552, 'Recibido', 2),
+(34, 'Lavar carcaza caja Toyota Hilux', 'Lavado premium', 'La chicha', 22456, 'Recibido', 4),
+(35, 'Balanceo de cardan MyS B', 'Control por vibracion, cambio de crucetas', 'Matias Erpelding', 12334451, 'Recibido', 1),
+(36, 'Lavar carcaza caja Fiat Uno', 'Lavado premium', 'Franco Arias', 4564654, 'Recibido', 4),
+(37, 'Lavar carcaza caja Honda Fit', 'Lavado simple', 'Gustavo Pollero', 654654, 'Recibido', 4),
+(38, 'Caja de cambios de Tc4000 Argentino', 'Servicio post carrera', 'Claudio Bazterrica', 13562, 'En proceso', 2),
+(41, 'Caja de cambios de Mar y Sierras B', 'Servicio post carrera', 'Damian Daza', 1356212, 'En proceso', 2);
 
 --
 -- Índices para tablas volcadas
@@ -132,13 +137,13 @@ ALTER TABLE `administrator`
 -- AUTO_INCREMENT de la tabla `garage`
 --
 ALTER TABLE `garage`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `works`
 --
 ALTER TABLE `works`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- Restricciones para tablas volcadas

@@ -1,0 +1,260 @@
+openapi: 3.0.1
+info:
+  title: API de trabajos de Servicio Mecanico Mestelan.
+  description: Esta API maneja toda la informacion de la base de datos de la empresa Servicio Mecanico Mestelan.
+  version: 1.0.0
+servers:
+  - url: localhost/Practicos/TPE/TPE-EZE-PARTE2/api/v1/jobs
+tags:
+- name: jobs
+  description: Este endpoint maneja toda la informacion relacionada con los trabajos de la empresa.
+  
+paths:
+
+  /:
+    get:
+      tags:
+      - jobs
+      summary: Obtiene todos los trabajos
+      
+      parameters:
+        - name: sort
+          in: query
+          description: Ordenable por los siguientes campos 'id', 'work_name', 'work_description', 'client_name', 'work_id', 'work_status', 'area', 'manager'
+          required: false
+          schema:
+            type: string
+        
+        - name: order
+          in: query
+          description: Ordenable ascendente o descendente, utilizar ASC o DESC (Uppercase).
+          required: false
+          schema:
+            type: string
+            
+        - name: offset
+          in: query
+          description: Posicion de la cual comienza a mostrar la coleccion solicitada (Posicion >= 0).
+          required: false
+          schema:
+            type: integer
+            
+        - name: limit
+          in: query
+          description: Cantidad de items que desea mostrar.
+          required: false
+          schema:
+            type: integer
+            
+        - name: filter
+          in: query
+          description: Permite solicitar items filtrados por campo y un determinado valor, los campos posibles son. 'work_name', 'work_description', 'client_name', 'work_id', 'work_status'. Ejemplos, jobs?client_name=Ezequiel Mestelan, jobs?work_id=353462.
+          required: false
+          schema:
+            type: string
+            
+      responses:
+        200:
+          description: (OK) Se obtuvo la coleccion de trabajos solicitada.
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+    
+    post:
+      tags:
+      - jobs
+      summary: Inserta un nuevo trabajo en la DB.
+      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodyJobsPost'
+        required: true
+        
+      responses:
+        201:
+          description: (Created) La informacion del trabajo se guardo exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobSuccesfullyCreated'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+          
+  /{jobID}:
+    get:
+      tags:
+        - jobs
+      summary: Obtiene la informacion de la base de datos de un trabajo.
+      parameters:
+      - name: jobID
+        in: path
+        description: ID del trabajo a obtener
+        required: true
+        schema:
+          type: integer
+          
+        
+      responses:
+        200:
+          description: (OK) La informacion del trabajo se obtuvo exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobSuccesfullyGet'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+    
+  /{jobModifyID}:
+    put:
+      tags:
+      - jobs
+      summary: Modifica el trabajo seleccionado por ID en la DB.
+      
+      parameters:
+        - name: jobModifyID
+          in: path
+          description: ID del trabajo a modificar
+          required: true
+          schema:
+            type: integer
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodyJobPut'
+        
+      responses:
+        200:
+          description: (OK) El trabajo se modifico correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobSuccesfullyGet'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      
+components:
+  
+  responses:
+    NotFound:
+      description: (NotFound) No se encontro la informacion solicitada.
+      
+    BadRequest:
+      description: (BadRequest) Datos incorrectos o falta informacion obligatoria.
+  
+  schemas:
+  
+    bodyJobPut:
+      type: object
+      properties:
+        work_name:
+          type: string
+          description: Nombre del trabajo a asignar.
+        work_desciption:
+          type: string
+          description: Descripcion relacionada al problema a resolver.
+        client_name:
+          type: string
+          description: Nombre del cliente.
+        work_status:
+          type: string
+          description: Estado del trabajo.
+        fk_id:
+          type: integer
+          description: Clave foranea para indicar a que sector pertenece el trabajo. 1 para torneria, 2 para cajas de cambios, 3 para trabado, 4 para lavado.
+    
+    jobSuccesfullyGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID primario de trabajo.
+        work_name:
+          type: string
+          description: Nombre del trabajo.
+        work_desciption:
+          type: string
+          description: Descripcion del trabajo.
+        client_name:
+          type: string
+          description: Nombre del cliente.
+        work_id:
+          type: integer
+          description: Numero de trabajo.
+        work_status:
+          type: string
+          description: Estado del trabajo.
+        area:
+          type: string
+          description: Area de trabajo.
+        manager:
+          type: string
+          description: Responsable de area de trabajo.
+  
+    bodyJobsPost:
+      type: object
+      properties:
+        work_name:
+          type: string
+          description: Nombre del trabajo a asignar.
+        work_desciption:
+          type: string
+          description: Descripcion relacionada al problema a resolver.
+        client_name:
+          type: string
+          description: Nombre del cliente.
+        work_id:
+          type: integer
+          description: Numero de trabajo para realizar seguimiento.
+        work_status:
+          type: string
+          description: Estado del trabajo.
+        fk_id:
+          type: integer
+          description: Clave foranea para indicar a que sector pertenece el trabajo. 1 para torneria, 2 para cajas de cambios, 3 para trabado, 4 para lavado.
+          
+    jobSuccesfullyCreated:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID primario de trabajo.
+        work_name:
+          type: string
+          description: Nombre del trabajo.
+        work_desciption:
+          type: string
+          description: Descripcion del trabajo.
+        client_name:
+          type: string
+          description: Nombre del cliente.
+        work_id:
+          type: integer
+          description: Numero de trabajo.
+        work_status:
+          type: string
+          description: Estado del trabajo.
+        area:
+          type: string
+          description: Area de trabajo.
+        manager:
+          type: string
+          description: Responsable de area de trabajo.
+        
+          
+        
+          
+          
+        
+    
