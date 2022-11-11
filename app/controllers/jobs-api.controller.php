@@ -2,6 +2,7 @@
 
     require_once './app/models/main.model.php';
     require_once './app/models/jobs.model.php';
+    require_once './app/helpers/api.helper.php';
     require_once './app/models/sectors.model.php';
     require_once './app/views/api.view.php';
 
@@ -10,6 +11,7 @@
         private $jobsModel;
         private $sectorsModel;
         private $apiView;
+        private $apiHelper;
         private $data;
         private $sortfield;
         private $sortOrder;
@@ -21,6 +23,7 @@
         function __construct(){
             $this->jobsModel = new JobsModel();
             $this->apiView = new ApiView();
+            $this->apiHelper = new ApiHelper();
             $this->data = file_get_contents("php://input");
             $this->fields = ['id', 'work_name', 'work_description', 'client_name', 'work_id', 'work_status', 'area', 'manager'];
         }
@@ -63,58 +66,76 @@
 
         // API/JOBS/:ID DELETE
         function delete($params = null){
-            $id = $params[':ID'];
-            $job = $this->jobsModel->getJob($id);
 
-            if($job){
-                $this->jobsModel->delete($id);
-                $this->apiView->response($job);
-            } else{
-                $this->apiView->response("Objeto no encontrado.", 404);
+            if($this->apiHelper->isLoggedIn()){
+
+                $id = $params[':ID'];
+                $job = $this->jobsModel->getJob($id);
+
+                if($job){
+                    $this->jobsModel->delete($id);
+                    $this->apiView->response("Eliminacion exitosa, id: ".$id);
+                } else{
+                    $this->apiView->response("Objeto no encontrado.", 404);
+                }
+            } else {
+                $this->apiView->response('No autorizado', 401);
             }
         }
 
         // API/JOBS POST
         function insert($params = null){
-            $data = $this->getData();
-            if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->job_id)||empty($data->status)||empty($data->fk_id)){
-                $this->apiView->response("Ingrese los campos", 400);
-            } else{
-                $job = $this->jobsModel->getJobByJobId($data->job_id);
-                $sector = $this->sectorsModel->getSector($data->fk_id);
-                if($job)
-                    $this->apiView->response("El codigo de trabajo ingresado ya existe.", 400);
-                else if(!$sector)
-                    $this->apiView->response("El sector de trabajo introducido no existe", 400);
-                else{
-                    $id = $this->jobsModel->add($data->name, $data->description, $data->client_name, $data->job_id, $data->status, $data->fk_id);
-                    $job = $this->jobsModel->getJob($id);
-                    $this->apiView->response($job, 201);
-                }
-            }
-        }
 
-        // API/JOBS/:ID PUT
-        function modify($params = null){
-            $id = $params[':ID'];
-            $job = $this->jobsModel->getJob($id);
+            if($this->apiHelper->isLoggedIn()){
 
-            if($job){
                 $data = $this->getData();
-                if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->status)||empty($data->fk_id)){
+                if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->job_id)||empty($data->status)||empty($data->fk_id)){
                     $this->apiView->response("Ingrese los campos", 400);
                 } else{
+                    $job = $this->jobsModel->getJobByJobId($data->job_id);
                     $sector = $this->sectorsModel->getSector($data->fk_id);
-                    if (!$sector)
+                    if($job)
+                        $this->apiView->response("El codigo de trabajo ingresado ya existe.", 400);
+                    else if(!$sector)
                         $this->apiView->response("El sector de trabajo introducido no existe", 400);
                     else{
-                        $this->jobsModel->update($id, $data->name, $data->description, $data->client_name, $data->status, $data->fk_id);
+                        $id = $this->jobsModel->add($data->name, $data->description, $data->client_name, $data->job_id, $data->status, $data->fk_id);
                         $job = $this->jobsModel->getJob($id);
                         $this->apiView->response($job, 201);
                     }
                 }
             } else {
-                $this->apiView->response("Objeto no encontrado.", 404);
+                $this->apiView->response('No autorizado', 401);
+            }
+        }
+
+        // API/JOBS/:ID PUT
+        function modify($params = null){
+
+            if($this->apiHelper->isLoggedIn()){
+            
+                $id = $params[':ID'];
+                $job = $this->jobsModel->getJob($id);
+
+                if($job){
+                    $data = $this->getData();
+                    if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->status)||empty($data->fk_id)){
+                        $this->apiView->response("Ingrese los campos", 400);
+                    } else{
+                        $sector = $this->sectorsModel->getSector($data->fk_id);
+                        if (!$sector)
+                            $this->apiView->response("El sector de trabajo introducido no existe", 400);
+                        else{
+                            $this->jobsModel->update($id, $data->name, $data->description, $data->client_name, $data->status, $data->fk_id);
+                            $job = $this->jobsModel->getJob($id);
+                            $this->apiView->response($job, 201);
+                        }
+                    }
+                } else {
+                    $this->apiView->response("Objeto no encontrado.", 404);
+                }
+            } else {
+                $this->apiView->response('No autorizado', 401);
             }
         }
 
@@ -176,6 +197,7 @@
             }
         }
 
+        //Chequea que los valores de paginacion sean correctos.
         private function checkPaginationValues(){
             if(!($this->checkOffset($this->from)&&$this->checkLimit($this->quantity))){
                 $this->apiView->response("Los campos de paginacion no son validos.", 400);
@@ -185,7 +207,7 @@
 
         //Chequea que el valor GET offset sea un numero.
         private function checkOffset($offset){
-            if((is_numeric($offset)))
+            if(is_numeric($offset) && $offset >= 0)
                 return true;
             else
                 return false;
@@ -193,12 +215,13 @@
 
         //Chequea que el valor GET limit sea un numero.
         private function checkLimit($limit){
-            if((is_numeric($limit)))
+            if(is_numeric($limit) && $limit >= 0)
                 return true;
             else
                 return false;
         }
 
+        //Obtiene campo y valor para filtrado.
         private function getFieldValues(){
             foreach($this->fields as $field){
                 if(isset($_GET[$field])){

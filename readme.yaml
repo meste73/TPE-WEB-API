@@ -85,15 +85,15 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
           
-  /{jobID}:
+  /{jobId}:
     get:
       tags:
         - jobs
       summary: Obtiene la informacion de la base de datos de un trabajo.
       parameters:
-      - name: jobID
+      - name: jobId
         in: path
-        description: ID del trabajo a obtener
+        description: Id del trabajo a obtener
         required: true
         schema:
           type: integer
@@ -111,16 +111,16 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
     
-  /{jobModifyID}:
+  /{jobModifyId}:
     put:
       tags:
       - jobs
-      summary: Modifica el trabajo seleccionado por ID en la DB.
+      summary: Modifica el trabajo seleccionado por Id en la DB.
       
       parameters:
-        - name: jobModifyID
+        - name: jobModifyId
           in: path
-          description: ID del trabajo a modificar
+          description: Id del trabajo a modificar
           required: true
           schema:
             type: integer
@@ -179,7 +179,7 @@ components:
       properties:
         id:
           type: integer
-          description: ID primario de trabajo.
+          description: Id primario de trabajo.
         work_name:
           type: string
           description: Nombre del trabajo.
@@ -229,7 +229,7 @@ components:
       properties:
         id:
           type: integer
-          description: ID primario de trabajo.
+          description: Id primario de trabajo.
         work_name:
           type: string
           description: Nombre del trabajo.
