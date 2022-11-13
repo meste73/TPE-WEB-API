@@ -24,6 +24,7 @@
             $this->jobsModel = new JobsModel();
             $this->apiView = new ApiView();
             $this->apiHelper = new ApiHelper();
+            $this->sectorsModel = new SectorsModel();
             $this->data = file_get_contents("php://input");
             $this->fields = ['id', 'work_name', 'work_description', 'client_name', 'work_id', 'work_status', 'area', 'manager'];
         }
@@ -89,7 +90,7 @@
             if($this->apiHelper->isLoggedIn()){
 
                 $data = $this->getData();
-                if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->job_id)||empty($data->status)||empty($data->fk_id)){
+                if(empty($data->work_name)||empty($data->work_description)||empty($data->client_name)||empty($data->work_id)||empty($data->work_status)||empty($data->fk_id)){
                     $this->apiView->response("Ingrese los campos", 400);
                 } else{
                     $job = $this->jobsModel->getJobByJobId($data->job_id);
@@ -99,7 +100,7 @@
                     else if(!$sector)
                         $this->apiView->response("El sector de trabajo introducido no existe", 400);
                     else{
-                        $id = $this->jobsModel->add($data->name, $data->description, $data->client_name, $data->job_id, $data->status, $data->fk_id);
+                        $id = $this->jobsModel->add($data->work_name, $data->work_description, $data->client_name, $data->work_id, $data->work_status, $data->fk_id);
                         $job = $this->jobsModel->getJob($id);
                         $this->apiView->response($job, 201);
                     }
@@ -119,14 +120,14 @@
 
                 if($job){
                     $data = $this->getData();
-                    if(empty($data->name)||empty($data->description)||empty($data->client_name)||empty($data->status)||empty($data->fk_id)){
+                    if(empty($data->work_name)||empty($data->work_description)||empty($data->client_name)||empty($data->work_status)||empty($data->fk_id)){
                         $this->apiView->response("Ingrese los campos", 400);
                     } else{
                         $sector = $this->sectorsModel->getSector($data->fk_id);
                         if (!$sector)
                             $this->apiView->response("El sector de trabajo introducido no existe", 400);
                         else{
-                            $this->jobsModel->update($id, $data->name, $data->description, $data->client_name, $data->status, $data->fk_id);
+                            $this->jobsModel->update($id, $data->work_name, $data->work_description, $data->client_name, $data->work_status, $data->fk_id);
                             $job = $this->jobsModel->getJob($id);
                             $this->apiView->response($job, 201);
                         }
@@ -225,8 +226,13 @@
         private function getFieldValues(){
             foreach($this->fields as $field){
                 if(isset($_GET[$field])){
-                    $this->field = $field;
-                    $this->fieldValue = $_GET[$field];
+                    if($_GET[$field]='id'){
+                        $this->apiView->response("No se admite filtrado por id con query params", 400);
+                        die();
+                    }else{
+                        $this->field = $field;
+                        $this->fieldValue = $_GET[$field];
+                    }
                 }
             }
         }

@@ -11,6 +11,6 @@
     $router->addRoute('jobs/:ID', 'DELETE', 'JobsApiController', 'delete');
     $router->addRoute('jobs', 'POST', 'JobsApiController', 'insert');
     $router->addRoute('jobs/:ID', 'PUT', 'JobsApiController', 'modify');
-    $router->addRoute('user/token', 'GET', 'AuthApiController', 'getToken');
+    $router->addRoute('users/token', 'GET', 'AuthApiController', 'getToken');
 
     $router->route($_GET["resource"], $_SERVER['REQUEST_METHOD']);

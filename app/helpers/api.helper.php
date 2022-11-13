@@ -2,6 +2,12 @@
 
     class ApiHelper{
 
+        private $key;
+
+        function __construct(){
+            $this->key = "api.token.key";
+        }
+
         function getToken(){
             $auth = $this->getAuthHeader();
             $auth = explode(" ", $auth);
@@ -13,7 +19,7 @@
             $payload = $token[1];
             $signature = $token[2];
     
-            $new_signature = hash_hmac('SHA256', "$header.$payload", "Clave1234", true);
+            $new_signature = hash_hmac('SHA256', "$header.$payload", $this->key, true);
             $new_signature = base64url_encode($new_signature);
             if($signature!=$new_signature)
                 return array();
