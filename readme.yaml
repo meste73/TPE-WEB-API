@@ -5,18 +5,20 @@ info:
   version: 1.0.0
 servers:
   - url: localhost/Practicos/TPE/TPE-EZE-PARTE2/api/v1/jobs
+  - url: localhost/Practicos/TPE/TPE-EZE-PARTE2/api/v1/users
 tags:
 - name: jobs
   description: Este endpoint maneja toda la informacion relacionada con los trabajos de la empresa.
-  
+- name: users
+  description: Endpoint utilizado para la solicitud de tokens.
+
 paths:
 
-  /:
+  /jobs:
     get:
       tags:
       - jobs
       summary: Obtiene todos los trabajos
-      
       parameters:
         - name: sort
           in: query
@@ -53,6 +55,8 @@ paths:
           schema:
             type: string
             
+      
+            
       responses:
         200:
           description: (OK) Se obtuvo la coleccion de trabajos solicitada.
@@ -85,15 +89,15 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
           
-  /{jobId}:
+  /jobs/{jobID}:
     get:
       tags:
         - jobs
       summary: Obtiene la informacion de la base de datos de un trabajo.
       parameters:
-      - name: jobId
+      - name: jobID
         in: path
-        description: Id del trabajo a obtener
+        description: ID del trabajo a obtener
         required: true
         schema:
           type: integer
@@ -111,16 +115,16 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
     
-  /{jobModifyId}:
+  /jobs/{jobModifyID}:
     put:
       tags:
       - jobs
-      summary: Modifica el trabajo seleccionado por Id en la DB.
+      summary: Modifica el trabajo seleccionado por ID en la DB.
       
       parameters:
-        - name: jobModifyId
+        - name: jobModifyID
           in: path
-          description: Id del trabajo a modificar
+          description: ID del trabajo a modificar
           required: true
           schema:
             type: integer
@@ -143,10 +147,32 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+          
+  /users/token:
+    get:
+      tags:
+      - users
+      summary: Se solicita token mediante autenticacion BASIC.
+      
+      responses:
+        200:
+          description: (OK) Token obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'
+        
+        403:
+          $ref: '#/components/responses/Unauthorized'
+  
       
 components:
   
   responses:
+    
+    Unauthorized:
+      description: (Unauthorized) Usuario o contraseña incorrectos.
+    
     NotFound:
       description: (NotFound) No se encontro la informacion solicitada.
       
@@ -179,7 +205,7 @@ components:
       properties:
         id:
           type: integer
-          description: Id primario de trabajo.
+          description: ID primario de trabajo.
         work_name:
           type: string
           description: Nombre del trabajo.
@@ -229,7 +255,7 @@ components:
       properties:
         id:
           type: integer
-          description: Id primario de trabajo.
+          description: ID primario de trabajo.
         work_name:
           type: string
           description: Nombre del trabajo.
@@ -251,6 +277,12 @@ components:
         manager:
           type: string
           description: Responsable de area de trabajo.
+          
+    token:
+      type: string
+      description: Token formato hash.
+      example: $2a$12$3yfEjmTz.X/5XOM6lo1CXuB8iqg5UY1I.HYcX6Yeg08KwFYocgvRu
+      
         
           
         
