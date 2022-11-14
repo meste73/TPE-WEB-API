@@ -13,6 +13,7 @@
         private $apiView;
         private $apiHelper;
         private $data;
+        private $fields;
         private $sortfield;
         private $sortOrder;
         private $from;
@@ -93,7 +94,7 @@
                 if(empty($data->work_name)||empty($data->work_description)||empty($data->client_name)||empty($data->work_id)||empty($data->work_status)||empty($data->fk_id)){
                     $this->apiView->response("Ingrese los campos", 400);
                 } else{
-                    $job = $this->jobsModel->getJobByJobId($data->job_id);
+                    $job = $this->jobsModel->getJobByJobId($data->work_id);
                     $sector = $this->sectorsModel->getSector($data->fk_id);
                     if($job)
                         $this->apiView->response("El codigo de trabajo ingresado ya existe.", 400);
@@ -155,11 +156,13 @@
 
         //Obtiene valor GET de order
         private function getSortOrder(){
-            if(isset($_GET['order']))
-                $this->sortOrder = $_GET['order'];
-            else
+            if(isset($_GET['order'])){
+                $this->sortOrder = strtoupper($_GET['order']);
+            }
+            else{
                 $this->sortOrder = "ASC";
             }
+        }
 
         //Chequea que el valor GET 
         private function checkSortValues(){
@@ -226,7 +229,7 @@
         private function getFieldValues(){
             foreach($this->fields as $field){
                 if(isset($_GET[$field])){
-                    if($_GET[$field]='id'){
+                    if($field == 'id'){
                         $this->apiView->response("No se admite filtrado por id con query params", 400);
                         die();
                     }else{

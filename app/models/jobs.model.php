@@ -27,7 +27,7 @@
         }
 
         function getJob($id){
-            $query = $this->db->prepare('SELECT works.work_name, works.work_description, works.client_name, works.work_id, works.work_status, garage.area, garage.manager FROM works JOIN garage ON works.fk_id = garage.id WHERE works.id = ?');
+            $query = $this->db->prepare('SELECT works.id, works.work_name, works.work_description, works.client_name, works.work_id, works.work_status, garage.area, garage.manager FROM works JOIN garage ON works.fk_id = garage.id WHERE works.id = ?');
             $query->execute([$id]);
             return $query->fetch(PDO::FETCH_OBJ);
         }
